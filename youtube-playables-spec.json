@@ -1,0 +1,46 @@
+{
+  "name": "Neon Number Games",
+  "version": "2.0.0",
+  "category": "Puzzle & Arcade",
+  "orientation": "any",
+  "aspectRatio": "responsive",
+  "supportedResolutions": [
+    {
+      "aspect": "9:16",
+      "width": 1080,
+      "height": 1920,
+      "description": "Mobile Portrait / YouTube Shorts Playables"
+    },
+    {
+      "aspect": "16:9",
+      "width": 1920,
+      "height": 1080,
+      "description": "Desktop / Living Room YouTube Playables"
+    },
+    {
+      "aspect": "1:1",
+      "width": 1080,
+      "height": 1080,
+      "description": "Adaptive Tablet & Square Viewport"
+    }
+  ],
+  "requirements": {
+    "offlineCapable": true,
+    "safeAreaInsetSupport": true,
+    "touchInteraction": true,
+    "mouseInteraction": true,
+    "keyboardNavigation": true,
+    "audioLifecycleHandling": true,
+    "monetizationIncluded": false,
+    "externalDependencies": false,
+    "maxLoadLatencySeconds": 2.5
+  },
+  "sdkHooks": {
+    "firstFrameReady": "YouTubePlayables.reportFirstFrame() -> window.ytgame.game.firstFrameReady()",
+    "gameReady": "YouTubePlayables.reportGameReady() -> window.ytgame.game.gameReady()",
+    "sendScore": "YouTubePlayables.sendScore(score) -> window.ytgame.engagement.sendScore({ value: score })",
+    "onPause": "YouTubePlayables.init() -> window.ytgame.system.onPause",
+    "onResume": "YouTubePlayables.init() -> window.ytgame.system.onResume",
+    "onAudioStateChange": "YouTubePlayables.init() -> window.ytgame.system.onAudioStateChange"
+  }
+}
