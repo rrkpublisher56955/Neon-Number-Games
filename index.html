@@ -1,0 +1,2126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Neon Number Games — Apple Fluid Motion &amp; YouTube Playables</title>
+  
+  <style>
+    /* ==========================================================================
+       APPLE DESIGN SYSTEM FOUNDATION & TYPOGRAPHY
+       ========================================================================== */
+    :root {
+      /* Apple System Palette */
+      --apple-blue: #0071e3;
+      --apple-blue-hover: #0077ed;
+      --apple-blue-active: #005bb5;
+      --apple-blue-glow: rgba(0, 113, 227, 0.45);
+      
+      --neon-cyan: #00e5ff;
+      --neon-cyan-glow: rgba(0, 229, 255, 0.4);
+      --neon-emerald: #30d158;
+      --neon-emerald-glow: rgba(48, 209, 88, 0.4);
+      --neon-violet: #bf5af2;
+      --neon-violet-glow: rgba(191, 90, 242, 0.4);
+      --neon-amber: #ff9f0a;
+      --neon-amber-glow: rgba(255, 159, 10, 0.4);
+      --neon-crimson: #ff453a;
+      --neon-crimson-glow: rgba(255, 69, 58, 0.4);
+      --neon-yellow: #ffd60a;
+
+      /* Apple Frosted Glass & Obsidian Titanium Canvas */
+      --bg-space: #07080c;
+      --glass-panel: rgba(18, 19, 26, 0.76);
+      --glass-panel-subtle: rgba(255, 255, 255, 0.05);
+      --glass-panel-hover: rgba(255, 255, 255, 0.09);
+      --glass-border: rgba(255, 255, 255, 0.16);
+      --glass-border-specular: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.05) 50%, rgba(0,229,255,0.2) 100%);
+      
+      --text-primary: #f5f5f7;
+      --text-secondary: #a1a1a6;
+      --text-tertiary: #6e6e73;
+
+      /* Motion physics constants */
+      --spring-easing: cubic-bezier(0.16, 1, 0.3, 1);
+      --spring-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+      --duration-snappy: 0.22s;
+      --duration-smooth: 0.4s;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    body {
+      background-color: var(--bg-space);
+      color: var(--text-primary);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+      min-height: -webkit-fill-available;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: env(safe-area-inset-top, 16px) env(safe-area-inset-right, 16px) env(safe-area-inset-bottom, 16px) env(safe-area-inset-left, 16px);
+      overflow-x: hidden;
+      position: relative;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* 8K Interactive Ambient Canvas */
+    #ambientCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* Confetti Particle Canvas */
+    #confettiCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 999;
+      pointer-events: none;
+    }
+
+    /* ==========================================================================
+       MAIN CONTAINER & LIQUID GLASS ARCHITECTURE
+       ========================================================================== */
+    .app-viewport {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 680px;
+      margin: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Apple Top Dynamic Island Header */
+    .dynamic-island {
+      background: rgba(12, 13, 18, 0.85);
+      backdrop-filter: blur(30px) saturate(200%);
+      -webkit-backdrop-filter: blur(30px) saturate(200%);
+      border: 1px solid var(--glass-border);
+      border-radius: 9999px;
+      padding: 10px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+      transition: all var(--duration-snappy) var(--spring-easing);
+    }
+
+    .island-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-orb {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--neon-cyan), var(--apple-blue));
+      box-shadow: 0 0 14px var(--neon-cyan-glow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 800;
+      color: #000;
+    }
+
+    .brand-title {
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: -0.3px;
+      color: var(--text-primary);
+    }
+
+    .island-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .icon-button {
+      background: var(--glass-panel-subtle);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text-secondary);
+      border-radius: 9999px;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 14px;
+      transition: transform 0.12s var(--spring-easing), background 0.2s, color 0.2s;
+    }
+
+    .icon-button:active {
+      transform: scale(0.92);
+      background: var(--glass-panel-hover);
+      color: var(--text-primary);
+    }
+
+    .icon-button.active {
+      color: var(--neon-cyan);
+      border-color: var(--neon-cyan);
+      box-shadow: 0 0 10px var(--neon-cyan-glow);
+    }
+
+    /* Main Frosted Glass Card */
+    .glass-card {
+      background: var(--glass-panel);
+      backdrop-filter: blur(32px) saturate(190%);
+      -webkit-backdrop-filter: blur(32px) saturate(190%);
+      border: 1px solid var(--glass-border);
+      border-radius: 28px;
+      padding: 26px 28px;
+      box-shadow: 
+        0 30px 60px rgba(0, 0, 0, 0.65),
+        0 10px 24px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.22);
+      transition: all var(--duration-smooth) var(--spring-easing);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Ambient card light reflection line */
+    .glass-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 15%;
+      right: 15%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+      pointer-events: none;
+    }
+
+    /* Card Header & Title */
+    .header-section {
+      text-align: center;
+      margin-bottom: 22px;
+    }
+
+    .app-heading {
+      font-size: 2.1rem;
+      font-weight: 700;
+      letter-spacing: -0.8px;
+      line-height: 1.15;
+      background: linear-gradient(135deg, #ffffff 10%, #dcdce2 50%, var(--neon-cyan) 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      margin-bottom: 6px;
+    }
+
+    .app-subheading {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      font-weight: 400;
+      letter-spacing: -0.15px;
+    }
+
+    /* Natural Language Semantic Command Bar */
+    .nlp-search-box {
+      margin-top: 14px;
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .nlp-input {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+      padding: 10px 42px 10px 14px;
+      color: var(--text-primary);
+      font-size: 0.85rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .nlp-input:focus {
+      border-color: var(--neon-cyan);
+      box-shadow: 0 0 12px var(--neon-cyan-glow);
+    }
+
+    .nlp-submit-icon {
+      position: absolute;
+      right: 12px;
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .nlp-submit-icon:hover {
+      color: var(--neon-cyan);
+    }
+
+    /* ==========================================================================
+       APPLE SEGMENTED TAB CONTROLLER
+       ========================================================================== */
+    .segmented-control {
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 4px;
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 3px;
+      margin-bottom: 22px;
+      position: relative;
+    }
+
+    .segment-btn {
+      background: transparent;
+      border: none;
+      border-radius: 12px;
+      padding: 9px 4px;
+      color: var(--text-secondary);
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: -0.1px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      transition: all 0.2s var(--spring-easing);
+      user-select: none;
+    }
+
+    .segment-btn svg {
+      width: 16px;
+      height: 16px;
+      stroke-width: 2.2;
+      stroke: currentColor;
+      fill: none;
+      transition: stroke 0.2s;
+    }
+
+    .segment-btn:active {
+      transform: scale(0.94);
+    }
+
+    .segment-btn.active {
+      background: rgba(255, 255, 255, 0.12);
+      color: var(--text-primary);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    }
+
+    .segment-btn.active svg {
+      stroke: var(--neon-cyan);
+      filter: drop-shadow(0 0 6px var(--neon-cyan-glow));
+    }
+
+    /* Tab Panes */
+    .tab-pane {
+      display: none;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.25s var(--spring-easing), transform 0.25s var(--spring-easing);
+    }
+
+    .tab-pane.active {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ==========================================================================
+       INPUT CONTROLS & APPLE ACTION BUTTONS
+       ========================================================================== */
+    .input-field-wrapper {
+      position: relative;
+      margin-bottom: 14px;
+    }
+
+    .apple-input {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.42);
+      border: 1.5px solid rgba(255, 255, 255, 0.14);
+      border-radius: 16px;
+      padding: 16px 20px;
+      font-size: 1.15rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      outline: none;
+      font-family: inherit;
+      transition: border-color var(--duration-snappy), box-shadow var(--duration-snappy), background var(--duration-snappy);
+    }
+
+    .apple-input:focus {
+      background: rgba(0, 0, 0, 0.6);
+      border-color: var(--apple-blue);
+      box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.25);
+    }
+
+    .apple-input::placeholder {
+      color: var(--text-tertiary);
+      font-weight: 400;
+    }
+
+    .button-stack {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    /* Apple Primary Action Pill Button */
+    .btn-action-primary {
+      background: var(--apple-blue);
+      color: #ffffff;
+      border: none;
+      border-radius: 9999px;
+      padding: 15px 26px;
+      font-size: 1.02rem;
+      font-weight: 600;
+      letter-spacing: -0.2px;
+      cursor: pointer;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 6px 18px var(--apple-blue-glow), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+      transition: transform 0.12s var(--spring-easing), background 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-action-primary:hover {
+      background: var(--apple-blue-hover);
+      box-shadow: 0 8px 24px rgba(0, 113, 227, 0.6);
+    }
+
+    .btn-action-primary:active {
+      transform: scale(0.96);
+      background: var(--apple-blue-active);
+    }
+
+    .btn-action-emerald {
+      background: var(--neon-emerald);
+      color: #000000;
+      font-weight: 700;
+      box-shadow: 0 6px 18px var(--neon-emerald-glow);
+    }
+
+    .btn-action-emerald:hover {
+      background: #39e365;
+    }
+
+    .btn-action-emerald:active {
+      transform: scale(0.96);
+      background: #25a844;
+    }
+
+    .btn-action-crimson {
+      background: var(--neon-crimson);
+      color: #ffffff;
+      box-shadow: 0 6px 18px var(--neon-crimson-glow);
+    }
+
+    .btn-action-crimson:hover {
+      background: #ff544a;
+    }
+
+    .btn-action-crimson:active {
+      transform: scale(0.96);
+      background: #d9382f;
+    }
+
+    /* ==========================================================================
+       RESULTS & STATS CHIPS
+       ========================================================================== */
+    .result-sheet {
+      margin-top: 20px;
+      padding: 18px 20px;
+      border-radius: 18px;
+      font-size: 1rem;
+      font-weight: 600;
+      display: none;
+      align-items: center;
+      gap: 12px;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid;
+      animation: springAppear 0.35s var(--spring-bounce);
+    }
+
+    @keyframes springAppear {
+      from { transform: scale(0.92) translateY(8px); opacity: 0; }
+      to { transform: scale(1) translateY(0); opacity: 1; }
+    }
+
+    .result-sheet.positive {
+      background: rgba(48, 209, 88, 0.12);
+      color: #72ff95;
+      border-color: rgba(48, 209, 88, 0.35);
+      box-shadow: 0 0 20px rgba(48, 209, 88, 0.18);
+    }
+
+    .result-sheet.negative {
+      background: rgba(255, 69, 58, 0.12);
+      color: #ff857d;
+      border-color: rgba(255, 69, 58, 0.35);
+      box-shadow: 0 0 20px rgba(255, 69, 58, 0.18);
+    }
+
+    .result-sheet.neutral {
+      background: rgba(0, 229, 255, 0.12);
+      color: #73f4ff;
+      border-color: rgba(0, 229, 255, 0.35);
+      box-shadow: 0 0 20px rgba(0, 229, 255, 0.18);
+    }
+
+    .result-sheet.warning {
+      background: rgba(255, 159, 10, 0.12);
+      color: #ffd07a;
+      border-color: rgba(255, 159, 10, 0.35);
+      box-shadow: 0 0 20px rgba(255, 159, 10, 0.18);
+    }
+
+    /* Inspector Grid Metrics */
+    .inspector-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .inspect-chip {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .inspect-label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-tertiary);
+    }
+
+    .inspect-val {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    /* Stats Strip */
+    .game-metrics-bar {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 22px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .metric-cell {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .metric-caption {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      color: var(--text-secondary);
+    }
+
+    .metric-data {
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: var(--neon-cyan);
+    }
+
+    /* ==========================================================================
+       SPECIAL GAME MODE VISUALIZATIONS
+       ========================================================================== */
+    /* Mode 2: Range Bracket Gauge */
+    .range-bracket-wrapper {
+      margin: 16px 0;
+      padding: 14px 18px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+    }
+
+    .range-label-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .range-track {
+      width: 100%;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 9999px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .range-fill {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      background: linear-gradient(90deg, var(--neon-cyan), var(--neon-emerald));
+      border-radius: 9999px;
+      transition: all 0.3s var(--spring-easing);
+    }
+
+    /* Mode 3: Math Blitz Timer Bar */
+    .timer-track {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 9999px;
+      margin: 14px 0 18px;
+      overflow: hidden;
+    }
+
+    .timer-fill {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, var(--apple-blue), var(--neon-cyan));
+      border-radius: 9999px;
+      transition: width 0.1s linear;
+    }
+
+    /* Mode 4: 3D High/Low Card Container */
+    .card-deck-stage {
+      perspective: 1000px;
+      margin: 16px 0;
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+    }
+
+    .flip-card {
+      width: 130px;
+      height: 170px;
+      border-radius: 20px;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1.5px solid rgba(255, 255, 255, 0.18);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      transition: transform 0.5s var(--spring-bounce);
+      transform-style: preserve-3d;
+    }
+
+    .flip-card.reveal {
+      transform: rotateY(360deg);
+    }
+
+    .card-number {
+      font-size: 3.2rem;
+      font-weight: 800;
+      letter-spacing: -1px;
+      background: linear-gradient(135deg, #ffffff, var(--neon-cyan));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .card-tag {
+      position: absolute;
+      bottom: 12px;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-tertiary);
+    }
+
+    /* Mode 5: Prime Rush Bubbles Grid */
+    .prime-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin: 16px 0;
+    }
+
+    .prime-bubble {
+      aspect-ratio: 1;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1.5px solid rgba(255, 255, 255, 0.14);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: transform 0.12s var(--spring-easing), background 0.2s, border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .prime-bubble:active {
+      transform: scale(0.92);
+    }
+
+    .prime-bubble.correct {
+      background: rgba(48, 209, 88, 0.25);
+      border-color: var(--neon-emerald);
+      color: var(--neon-emerald);
+      box-shadow: 0 0 20px var(--neon-emerald-glow);
+      pointer-events: none;
+    }
+
+    .prime-bubble.wrong {
+      background: rgba(255, 69, 58, 0.25);
+      border-color: var(--neon-crimson);
+      color: var(--neon-crimson);
+      box-shadow: 0 0 20px var(--neon-crimson-glow);
+      animation: shake 0.3s;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+
+    /* Mode 6: Sequence Options Grid */
+    .sequence-options {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .sequence-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 14px;
+      padding: 14px;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: transform 0.12s var(--spring-easing), background 0.2s, border-color 0.2s;
+    }
+
+    .sequence-btn:active {
+      transform: scale(0.95);
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    /* Footer Telemetry Badge */
+    .footer-badges {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.72rem;
+      color: var(--text-tertiary);
+      letter-spacing: 0.2px;
+    }
+
+    .telemetry-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--neon-emerald);
+      box-shadow: 0 0 6px var(--neon-emerald-glow);
+    }
+
+    /* YouTube Playables Responsive Mobile Adjustments */
+    @media (max-width: 540px) {
+      .glass-card {
+        padding: 20px 16px;
+        border-radius: 22px;
+      }
+      .app-heading {
+        font-size: 1.7rem;
+      }
+      .segmented-control {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 4px;
+      }
+      .flip-card {
+        width: 100px;
+        height: 140px;
+      }
+      .card-number {
+        font-size: 2.5rem;
+      }
+      .prime-grid {
+        gap: 8px;
+      }
+      .prime-bubble {
+        font-size: 1.4rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background 8K Canvas for Quantum Floating Nodes -->
+  <canvas id="ambientCanvas"></canvas>
+  <canvas id="confettiCanvas"></canvas>
+
+  <div class="app-viewport">
+    
+    <!-- Apple Dynamic Island Control Bar -->
+    <header class="dynamic-island">
+      <div class="island-brand">
+        <div class="brand-orb">8K</div>
+        <span class="brand-title">Neon Numbers</span>
+      </div>
+      <div class="island-controls">
+        <button id="soundToggleBtn" class="icon-button active" title="Toggle Synthesizer Sound" aria-label="Toggle Sound">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>
+        </button>
+        <button id="fullscreenToggleBtn" class="icon-button" title="Toggle Fullscreen" aria-label="Toggle Fullscreen">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Frosted Glass Card -->
+    <main class="glass-card">
+      <div class="header-section">
+        <h1 class="app-heading">Quantum Math Arcade</h1>
+        <p class="app-subheading">Apple Fluid Motion • Procedural Audio • YouTube Playables</p>
+
+        <!-- Natural Language Intent Router Bar -->
+        <div class="nlp-search-box">
+          <input type="text" id="nlpInput" class="nlp-input" placeholder="Ask AI: e.g. 'quick mental math', 'is 97 prime?', 'guess 1-100'..." />
+          <button id="nlpBtn" class="nlp-submit-icon" title="Evaluate with TypeSafe System One">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Segmented Tab Controller (6 Modes) -->
+      <nav class="segmented-control" role="tablist">
+        <button class="segment-btn active" data-tab="tabInspector" role="tab">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+          <span>Inspect</span>
+        </button>
+        <button class="segment-btn" data-tab="tabGuessing" role="tab">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          <span>Guess</span>
+        </button>
+        <button class="segment-btn" data-tab="tabBlitz" role="tab">
+          <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+          <span>Blitz</span>
+        </button>
+        <button class="segment-btn" data-tab="tabHighLow" role="tab">
+          <svg viewBox="0 0 24 24"><polyline points="7 11 12 6 17 11"></polyline><polyline points="17 13 12 18 7 13"></polyline></svg>
+          <span>High/Low</span>
+        </button>
+        <button class="segment-btn" data-tab="tabPrimes" role="tab">
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+          <span>Primes</span>
+        </button>
+        <button class="segment-btn" data-tab="tabSequence" role="tab">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          <span>Sequence</span>
+        </button>
+      </nav>
+
+      <!-- ======================================================================
+           TAB 1: NUMBER INSPECTOR PRO
+           ====================================================================== -->
+      <section id="tabInspector" class="tab-pane active" role="tabpanel">
+        <div class="input-field-wrapper">
+          <input type="text" id="inspectorInput" class="apple-input" placeholder="Enter any number (e.g. 42, -7.5, 97)" autofocus />
+        </div>
+        <button id="inspectBtn" class="btn-action-primary">
+          <span>Analyze Number</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </button>
+
+        <div id="inspectorResult" class="result-sheet"></div>
+
+        <div id="inspectorGrid" class="inspector-grid" style="display: none;">
+          <div class="inspect-chip">
+            <span class="inspect-label">Parity</span>
+            <span id="parityVal" class="inspect-val">-</span>
+          </div>
+          <div class="inspect-chip">
+            <span class="inspect-label">Prime Status</span>
+            <span id="primeVal" class="inspect-val">-</span>
+          </div>
+          <div class="inspect-chip">
+            <span class="inspect-label">Binary</span>
+            <span id="binaryVal" class="inspect-val">-</span>
+          </div>
+          <div class="inspect-chip">
+            <span class="inspect-label">Hexadecimal</span>
+            <span id="hexVal" class="inspect-val">-</span>
+          </div>
+          <div class="inspect-chip">
+            <span class="inspect-label">Square Root</span>
+            <span id="sqrtVal" class="inspect-val">-</span>
+          </div>
+          <div class="inspect-chip">
+            <span class="inspect-label">Fibonacci Member</span>
+            <span id="fibVal" class="inspect-val">-</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================================
+           TAB 2: QUANTUM GUESSING GAME (1-100)
+           ====================================================================== -->
+      <section id="tabGuessing" class="tab-pane" role="tabpanel">
+        <p style="text-align: center; color: var(--text-secondary); margin-bottom: 12px; font-size: 0.95rem;">
+          Pinpoint the quantum hidden number between <strong id="guessMin">1</strong> and <strong id="guessMax">100</strong>.
+        </p>
+
+        <!-- Dynamic Range Track -->
+        <div class="range-bracket-wrapper">
+          <div class="range-label-row">
+            <span>Range Window</span>
+            <span id="rangeBoundsText">1 — 100</span>
+          </div>
+          <div class="range-track">
+            <div id="rangeFillBar" class="range-fill" style="left: 0%; width: 100%;"></div>
+          </div>
+        </div>
+
+        <div class="input-field-wrapper">
+          <input type="number" id="guessInput" class="apple-input" placeholder="Your guess (1-100)" min="1" max="100" />
+        </div>
+        <button id="guessSubmitBtn" class="btn-action-primary">
+          <span>Submit Guess</span>
+        </button>
+
+        <div id="guessResultSheet" class="result-sheet"></div>
+
+        <div class="game-metrics-bar">
+          <div class="metric-cell">
+            <span class="metric-caption">Attempts</span>
+            <span id="guessAttempts" class="metric-data">0</span>
+          </div>
+          <div class="metric-cell">
+            <span class="metric-caption">Best Record</span>
+            <span id="guessBest" class="metric-data">-</span>
+          </div>
+          <div class="metric-cell">
+            <span class="metric-caption">Thermal Radar</span>
+            <span id="thermalRadar" class="metric-data" style="font-size: 1.05rem; color: var(--neon-amber);">Idle</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================================
+           TAB 3: MENTAL MATH BLITZ
+           ====================================================================== -->
+      <section id="tabBlitz" class="tab-pane" role="tabpanel">
+        <div style="text-align: center; margin-bottom: 8px;">
+          <h2 id="blitzQuestion" style="font-size: 2.2rem; font-weight: 700; letter-spacing: -0.5px; color: var(--text-primary);">
+            Ready?
+          </h2>
+        </div>
+
+        <div class="timer-track">
+          <div id="blitzTimerBar" class="timer-fill"></div>
+        </div>
+
+        <div class="input-field-wrapper">
+          <input type="number" id="blitzAnswerInput" class="apple-input" placeholder="Solve quickly..." />
+        </div>
+        <button id="blitzSubmitBtn" class="btn-action-primary">
+          <span>Confirm Answer</span>
+        </button>
+
+        <div id="blitzResultSheet" class="result-sheet"></div>
+
+        <div class="game-metrics-bar">
+          <div class="metric-cell">
+            <span class="metric-caption">Score</span>
+            <span id="blitzScore" class="metric-data">0</span>
+          </div>
+          <div class="metric-cell">
+            <span class="metric-caption">Streak Multiplier</span>
+            <span id="blitzStreak" class="metric-data">x1</span>
+          </div>
+          <div class="metric-cell">
+            <span class="metric-caption">Personal Best</span>
+            <span id="blitzBest" class="metric-data">0</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================================
+           TAB 4: HIGH / LOW SURGE
+           ====================================================================== -->
+      <section id="tabHighLow" class="tab-pane" role="tabpanel">
+        <p style="text-align: center; color: var(--text-secondary); margin-bottom: 12px; font-size: 0.95rem;">
+          Will the next mystery quantum card be higher or lower?
+        </p>
+
+        <div class="card-deck-stage">
+          <div class="flip-card">
+            <span id="hlCurrentCard" class="card-number">50</span>
+            <span class="card-tag">Current</span>
+          </div>
+          <div id="hlNextCardContainer" class="flip-card">
+            <span id="hlNextCard" class="card-number">?</span>
+            <span class="card-tag">Next</span>
+          </div>
+        </div>
+
+        <div class="button-stack">
+          <button id="hlHigherBtn" class="btn-action-primary btn-action-emerald">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+            <span>Higher</span>
+          </button>
+          <button id="hlLowerBtn" class="btn-action-primary btn-action-crimson">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+            <span>Lower</span>
+          </button>
+        </div>
+
+        <div id="hlResultSheet" class="result-sheet"></div>
+
+        <div class="game-metrics-bar">
+          <div class="metric-cell">
+            <span class="metric-caption">Score</span>
+            <span id="hlScore" class="metric-data">0</span>
+          </div>
+          <div class="metric-cell">
+            <span class="metric-caption">Streak</span>
+            <span id="hlStreak" class="metric-data">0</span>
+          </div>
+          <div class="metric-cell">
+            <span class="metric-caption">Best</span>
+            <span id="hlBest" class="metric-data">0</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================================
+           TAB 5: PRIME HUNTER ARCADE (Reaction Mode)
+           ====================================================================== -->
+      <section id="tabPrimes" class="tab-pane" role="tabpanel">
+        <p style="text-align: center; color: var(--text-secondary); margin-bottom: 12px; font-size: 0.95rem;">
+          Tap all <strong style="color: var(--neon-emerald)">Prime Numbers</strong> before time runs out! Avoid composites.
+        </p>
+
+        <div class="timer-track">
+          <div id="primeTimerBar" class="timer-fill" style="background: linear-gradient(90deg, var(--neon-violet), var(--neon-cyan));"></div>
+        </div>
+
+        <div id="primeGrid" class="prime-grid">
+          <!-- Dynamically populated bubbles -->
+        </div>
+
+        <div class="game-metrics-bar">
+          <div class="metric-cell">
+            <span class="metric-caption">Cleared</span>
+            <span id="primesCleared" class="metric-data">0</span>
+          </div>
+          <div class="metric-cell">
+            <span class="metric-caption">Primes Left</span>
+            <span id="primesRemaining" class="metric-data">0</span>
+          </div>
+          <div class="metric-cell">
+            <span class="metric-caption">Score</span>
+            <span id="primeScore" class="metric-data">0</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================================
+           TAB 6: PATTERN MASTER (Sequence Memory)
+           ====================================================================== -->
+      <section id="tabSequence" class="tab-pane" role="tabpanel">
+        <p style="text-align: center; color: var(--text-secondary); margin-bottom: 12px; font-size: 0.95rem;">
+          Find the missing value <strong style="color: var(--neon-yellow)">[ ? ]</strong> in the pattern:
+        </p>
+
+        <div style="text-align: center; margin: 16px 0;">
+          <h2 id="sequenceFormula" style="font-size: 1.85rem; font-weight: 700; color: var(--text-primary); letter-spacing: -0.2px;">
+            2, 4, 8, 16, [ ? ]
+          </h2>
+          <span id="sequenceHint" style="display: block; font-size: 0.82rem; color: var(--text-tertiary); margin-top: 6px;">
+            Geometric progression (×2)
+          </span>
+        </div>
+
+        <div id="sequenceOptions" class="sequence-options">
+          <!-- 4 option buttons -->
+        </div>
+
+        <div id="sequenceResultSheet" class="result-sheet"></div>
+
+        <div class="game-metrics-bar">
+          <div class="metric-cell">
+            <span class="metric-caption">Score</span>
+            <span id="sequenceScore" class="metric-data">0</span>
+          </div>
+          <div class="metric-cell">
+            <span class="metric-caption">Level</span>
+            <span id="sequenceLevel" class="metric-data">1</span>
+          </div>
+          <div class="metric-cell">
+            <span class="metric-caption">Streak</span>
+            <span id="sequenceStreak" class="metric-data">0</span>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Footer System Status -->
+    <footer class="footer-badges">
+      <span class="telemetry-dot"></span>
+      <span>YouTube Playables Certified</span>
+      <span>•</span>
+      <span>TypeSafe System One Engine</span>
+    </footer>
+
+  </div>
+
+  <!-- ==========================================================================
+       SOUND SYNTHESIZER & GAME ENGINE LOGIC
+       ========================================================================== -->
+  <script>
+    /**
+     * ============================================================================
+     * APPLE AUDIO-HAPTIC SYNTHESIZER (100% Procedural Web Audio API)
+     * ============================================================================
+     */
+    class AppleSoundEngine {
+      constructor() {
+        this.ctx = null;
+        this.muted = localStorage.getItem('neon_audio_muted') === 'true';
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) {
+            this.ctx = new AudioContext();
+          }
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      playTap() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(220, this.ctx.currentTime + 0.025);
+
+        gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.025);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.025);
+
+        if (navigator.vibrate) navigator.vibrate(10);
+      }
+
+      playSuccess() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+
+        // Major Triad Arpeggio (C5 -> E5 -> G5 -> C6)
+        const notes = [523.25, 659.25, 783.99, 1046.50];
+        notes.forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime + idx * 0.04);
+
+          gain.gain.setValueAtTime(0.12, this.ctx.currentTime + idx * 0.04);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + idx * 0.04 + 0.18);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(this.ctx.currentTime + idx * 0.04);
+          osc.stop(this.ctx.currentTime + idx * 0.04 + 0.18);
+        });
+
+        if (navigator.vibrate) navigator.vibrate([15, 30, 20]);
+      }
+
+      playError() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(210, this.ctx.currentTime);
+        osc.frequency.linearRampToValueAtTime(140, this.ctx.currentTime + 0.14);
+
+        gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.14);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.14);
+
+        if (navigator.vibrate) navigator.vibrate([40, 20, 40]);
+      }
+
+      playCardFlip() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(320, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(680, this.ctx.currentTime + 0.06);
+
+        gain.gain.setValueAtTime(0.06, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.06);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.06);
+      }
+
+      playStreakFanfare() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const notes = [659.25, 830.61, 987.77, 1318.51];
+        notes.forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime + idx * 0.06);
+
+          gain.gain.setValueAtTime(0.14, this.ctx.currentTime + idx * 0.06);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + idx * 0.06 + 0.35);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(this.ctx.currentTime + idx * 0.06);
+          osc.stop(this.ctx.currentTime + idx * 0.06 + 0.35);
+        });
+
+        if (navigator.vibrate) navigator.vibrate([30, 40, 60]);
+      }
+
+      toggleMute() {
+        this.muted = !this.muted;
+        localStorage.setItem('neon_audio_muted', this.muted);
+        return this.muted;
+      }
+    }
+
+    const sound = new AppleSoundEngine();
+
+    /**
+     * ============================================================================
+     * YOUTUBE PLAYABLES SDK INTEGRATION BRIDGE
+     * ============================================================================
+     */
+    const YouTubePlayables = {
+      isInitialized: false,
+
+      init() {
+        if (this.isInitialized) return;
+        this.isInitialized = true;
+
+        // 1. Lifecycle callbacks from window.ytgame
+        if (window.ytgame) {
+          try {
+            window.ytgame.game.firstFrameReady();
+            window.ytgame.game.gameReady();
+
+            window.ytgame.system.onPause(() => {
+              if (sound.ctx) sound.ctx.suspend();
+            });
+
+            window.ytgame.system.onResume(() => {
+              if (sound.ctx && !sound.muted) sound.ctx.resume();
+            });
+
+            window.ytgame.system.onAudioStateChange((isMuted) => {
+              sound.muted = isMuted;
+            });
+          } catch (e) {
+            console.warn('YouTube Playables SDK hook notice:', e);
+          }
+        }
+
+        // 2. Standard Visibility Change (Pause timers/sound on background)
+        document.addEventListener('visibilitychange', () => {
+          if (document.hidden) {
+            if (sound.ctx) sound.ctx.suspend();
+          } else {
+            if (sound.ctx && !sound.muted) sound.ctx.resume();
+          }
+        });
+      },
+
+      sendScore(score) {
+        if (window.ytgame?.engagement?.sendScore) {
+          try {
+            window.ytgame.engagement.sendScore({ value: score });
+          } catch (e) {
+            console.log('Dispatched score to YouTube Playables:', score);
+          }
+        }
+      }
+    };
+
+    /**
+     * ============================================================================
+     * 8K AMBIENT PARTICLE BACKGROUND & CONFETTI ENGINE
+     * ============================================================================
+     */
+    const ambientCanvas = document.getElementById('ambientCanvas');
+    const actx = ambientCanvas.getContext('2d');
+    let width, height, dpr;
+    let particles = [];
+
+    function resizeCanvas() {
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      width = window.innerWidth;
+      height = window.innerHeight;
+      ambientCanvas.width = width * dpr;
+      ambientCanvas.height = height * dpr;
+      actx.scale(dpr, dpr);
+    }
+
+    class QuantumParticle {
+      constructor() {
+        this.reset();
+      }
+      reset() {
+        this.x = Math.random() * width;
+        this.y = Math.random() * height;
+        this.vx = (Math.random() - 0.5) * 0.45;
+        this.vy = (Math.random() - 0.5) * 0.45;
+        this.radius = Math.random() * 2 + 1;
+        this.alpha = Math.random() * 0.35 + 0.1;
+        this.glyph = ['0', '1', 'π', 'e', 'φ', '+', '×', '√', '∞'][Math.floor(Math.random() * 9)];
+        this.isGlyph = Math.random() > 0.65;
+      }
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        if (this.x < 0 || this.x > width || this.y < 0 || this.y > height) {
+          this.reset();
+        }
+      }
+      draw() {
+        if (this.isGlyph) {
+          actx.font = '10px -apple-system, sans-serif';
+          actx.fillStyle = `rgba(0, 229, 255, ${this.alpha * 0.75})`;
+          actx.fillText(this.glyph, this.x, this.y);
+        } else {
+          actx.beginPath();
+          actx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+          actx.fillStyle = `rgba(191, 90, 242, ${this.alpha * 0.65})`;
+          actx.fill();
+        }
+      }
+    }
+
+    function initAmbientParticles() {
+      resizeCanvas();
+      particles = Array.from({ length: 45 }, () => new QuantumParticle());
+      animateAmbient();
+    }
+
+    function animateAmbient() {
+      actx.clearRect(0, 0, width, height);
+      for (let p of particles) {
+        p.update();
+        p.draw();
+      }
+      requestAnimationFrame(animateAmbient);
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+
+    // Confetti Engine
+    const confettiCanvas = document.getElementById('confettiCanvas');
+    const cctx = confettiCanvas.getContext('2d');
+    let confettiParticles = [];
+
+    function triggerConfetti() {
+      confettiCanvas.width = window.innerWidth;
+      confettiCanvas.height = window.innerHeight;
+      confettiParticles = [];
+
+      const colors = ['#00e5ff', '#30d158', '#bf5af2', '#ff9f0a', '#ffd60a', '#ffffff'];
+      for (let i = 0; i < 75; i++) {
+        confettiParticles.push({
+          x: window.innerWidth / 2,
+          y: window.innerHeight / 2,
+          vx: (Math.random() - 0.5) * 14,
+          vy: (Math.random() - 0.7) * 16,
+          size: Math.random() * 8 + 4,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          rotation: Math.random() * 360,
+          rotSpeed: (Math.random() - 0.5) * 10,
+          opacity: 1
+        });
+      }
+      requestAnimationFrame(renderConfetti);
+    }
+
+    function renderConfetti() {
+      cctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+      let alive = false;
+      for (let p of confettiParticles) {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.4; // gravity
+        p.rotation += p.rotSpeed;
+        p.opacity -= 0.016;
+
+        if (p.opacity > 0) {
+          alive = true;
+          cctx.save();
+          cctx.translate(p.x, p.y);
+          cctx.rotate((p.rotation * Math.PI) / 180);
+          cctx.globalAlpha = p.opacity;
+          cctx.fillStyle = p.color;
+          cctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+          cctx.restore();
+        }
+      }
+      if (alive) requestAnimationFrame(renderConfetti);
+      else cctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+    }
+
+    /**
+     * ============================================================================
+     * MATH HELPERS
+     * ============================================================================
+     */
+    function isPrime(n) {
+      if (!Number.isInteger(n) || n <= 1) return false;
+      if (n <= 3) return true;
+      if (n % 2 === 0 || n % 3 === 0) return false;
+      for (let i = 5; i * i <= n; i += 6) {
+        if (n % i === 0 || n % (i + 2) === 0) return false;
+      }
+      return true;
+    }
+
+    function isPerfectSquare(n) {
+      if (n < 0) return false;
+      const s = Math.round(Math.sqrt(n));
+      return s * s === n;
+    }
+
+    function isFibonacci(n) {
+      if (n < 0) return false;
+      return isPerfectSquare(5 * n * n + 4) || isPerfectSquare(5 * n * n - 4);
+    }
+
+    /**
+     * ============================================================================
+     * UI VIEW CONTROLLER & TAB SWITCHING
+     * ============================================================================
+     */
+    function showResultSheet(el, message, type) {
+      el.innerHTML = message;
+      el.className = 'result-sheet ' + type;
+      el.style.display = 'flex';
+    }
+
+    function switchTab(tabId) {
+      sound.playTap();
+      document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.segment-btn').forEach(b => b.classList.remove('active'));
+
+      const targetPane = document.getElementById(tabId);
+      if (targetPane) targetPane.classList.add('active');
+
+      const activeBtn = document.querySelector(`.segment-btn[data-tab="${tabId}"]`);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      // Mode-specific on-focus logic
+      if (tabId === 'tabBlitz' && blitzState.activeQuestion === '') {
+        generateBlitzQuestion();
+      } else if (tabId === 'tabPrimes' && primeState.bubbles.length === 0) {
+        initPrimeRush();
+      } else if (tabId === 'tabSequence' && sequenceState.options.length === 0) {
+        generateSequence();
+      }
+    }
+
+    /**
+     * ============================================================================
+     * TAB 1: NUMBER INSPECTOR PRO
+     * ============================================================================
+     */
+    const inspectorInput = document.getElementById('inspectorInput');
+    const inspectBtn = document.getElementById('inspectBtn');
+    const inspectorResult = document.getElementById('inspectorResult');
+    const inspectorGrid = document.getElementById('inspectorGrid');
+
+    inspectBtn.addEventListener('click', runInspector);
+    inspectorInput.addEventListener('keydown', e => { if (e.key === 'Enter') runInspector(); });
+
+    function runInspector() {
+      sound.playTap();
+      const raw = inspectorInput.value.trim();
+      if (!raw) {
+        sound.playError();
+        showResultSheet(inspectorResult, '⚠️ Please enter a valid number to inspect.', 'warning');
+        inspectorGrid.style.display = 'none';
+        return;
+      }
+
+      const num = parseFloat(raw);
+      if (isNaN(num)) {
+        sound.playError();
+        showResultSheet(inspectorResult, '❌ Not a recognized number format.', 'negative');
+        inspectorGrid.style.display = 'none';
+        return;
+      }
+
+      sound.playSuccess();
+      let signText = num > 0 ? `${num} is Positive (+)` : num < 0 ? `${num} is Negative (−)` : `Zero (0)`;
+      showResultSheet(inspectorResult, `✨ <strong>${signText}</strong>`, 'neutral');
+
+      document.getElementById('parityVal').textContent = Number.isInteger(num) ? (num % 2 === 0 ? 'Even' : 'Odd') : 'Float';
+      document.getElementById('primeVal').textContent = Number.isInteger(num) ? (isPrime(num) ? 'Prime Number ⭐' : 'Composite') : 'N/A';
+      document.getElementById('binaryVal').textContent = Number.isInteger(num) ? '0b' + (num >>> 0).toString(2) : 'N/A';
+      document.getElementById('hexVal').textContent = Number.isInteger(num) ? '0x' + (num >>> 0).toString(16).toUpperCase() : 'N/A';
+      document.getElementById('sqrtVal').textContent = num >= 0 ? Math.sqrt(num).toFixed(4) : 'Complex (i)';
+      document.getElementById('fibVal').textContent = Number.isInteger(num) && isFibonacci(num) ? 'Yes (Fibonacci)' : 'No';
+
+      inspectorGrid.style.display = 'grid';
+    }
+
+    /**
+     * ============================================================================
+     * TAB 2: QUANTUM NUMBER GUESSING (1-100)
+     * ============================================================================
+     */
+    let guessTarget = Math.floor(Math.random() * 100) + 1;
+    let guessAttemptsCount = 0;
+    let guessRangeMin = 1;
+    let guessRangeMax = 100;
+    let guessBestRecord = localStorage.getItem('neon_guess_best') || '-';
+
+    const guessInput = document.getElementById('guessInput');
+    const guessSubmitBtn = document.getElementById('guessSubmitBtn');
+    const guessResultSheet = document.getElementById('guessResultSheet');
+    const guessAttemptsEl = document.getElementById('guessAttempts');
+    const guessBestEl = document.getElementById('guessBest');
+    const thermalRadarEl = document.getElementById('thermalRadar');
+    const rangeFillBar = document.getElementById('rangeFillBar');
+    const rangeBoundsText = document.getElementById('rangeBoundsText');
+
+    guessBestEl.textContent = guessBestRecord;
+
+    guessSubmitBtn.addEventListener('click', handleGuess);
+    guessInput.addEventListener('keydown', e => { if (e.key === 'Enter') handleGuess(); });
+
+    function handleGuess() {
+      sound.playTap();
+      const val = parseInt(guessInput.value.trim(), 10);
+      if (isNaN(val) || val < 1 || val > 100) {
+        sound.playError();
+        showResultSheet(guessResultSheet, '⚠️ Enter a whole number from 1 to 100.', 'warning');
+        return;
+      }
+
+      guessAttemptsCount++;
+      guessAttemptsEl.textContent = guessAttemptsCount;
+
+      const delta = Math.abs(val - guessTarget);
+      if (delta === 0) {
+        sound.playSuccess();
+        triggerConfetti();
+        showResultSheet(guessResultSheet, `🎉 <strong>Phenomenal!</strong> Found in ${guessAttemptsCount} attempts!`, 'positive');
+        thermalRadarEl.textContent = 'Found! 🎯';
+        thermalRadarEl.style.color = 'var(--neon-emerald)';
+
+        if (guessBestRecord === '-' || guessAttemptsCount < parseInt(guessBestRecord, 10)) {
+          guessBestRecord = guessAttemptsCount;
+          localStorage.setItem('neon_guess_best', guessBestRecord);
+          guessBestEl.textContent = guessBestRecord;
+        }
+
+        YouTubePlayables.sendScore(100 - guessAttemptsCount);
+
+        setTimeout(resetGuessingGame, 2600);
+      } else {
+        sound.playError();
+        if (val < guessTarget) {
+          guessRangeMin = Math.max(guessRangeMin, val + 1);
+          showResultSheet(guessResultSheet, `⬆️ <strong>Higher!</strong> Target is greater than ${val}.`, 'negative');
+        } else {
+          guessRangeMax = Math.min(guessRangeMax, val - 1);
+          showResultSheet(guessResultSheet, `⬇️ <strong>Lower!</strong> Target is less than ${val}.`, 'negative');
+        }
+
+        // Radar temperature
+        if (delta <= 3) {
+          thermalRadarEl.textContent = 'Burning Hot 🔥';
+          thermalRadarEl.style.color = 'var(--neon-crimson)';
+        } else if (delta <= 10) {
+          thermalRadarEl.textContent = 'Warm ☀️';
+          thermalRadarEl.style.color = 'var(--neon-amber)';
+        } else {
+          thermalRadarEl.textContent = 'Cold ❄️';
+          thermalRadarEl.style.color = 'var(--neon-cyan)';
+        }
+
+        // Update range visual
+        const leftPercent = ((guessRangeMin - 1) / 100) * 100;
+        const widthPercent = ((guessRangeMax - guessRangeMin + 1) / 100) * 100;
+        rangeFillBar.style.left = leftPercent + '%';
+        rangeFillBar.style.width = widthPercent + '%';
+        rangeBoundsText.textContent = `${guessRangeMin} — ${guessRangeMax}`;
+      }
+
+      guessInput.value = '';
+    }
+
+    function resetGuessingGame() {
+      guessTarget = Math.floor(Math.random() * 100) + 1;
+      guessAttemptsCount = 0;
+      guessRangeMin = 1;
+      guessRangeMax = 100;
+      guessAttemptsEl.textContent = '0';
+      rangeFillBar.style.left = '0%';
+      rangeFillBar.style.width = '100%';
+      rangeBoundsText.textContent = '1 — 100';
+      thermalRadarEl.textContent = 'Idle';
+      thermalRadarEl.style.color = 'var(--neon-amber)';
+      guessResultSheet.style.display = 'none';
+    }
+
+    /**
+     * ============================================================================
+     * TAB 3: MENTAL MATH BLITZ
+     * ============================================================================
+     */
+    const blitzState = {
+      score: 0,
+      streak: 0,
+      best: parseInt(localStorage.getItem('neon_blitz_best') || '0', 10),
+      activeQuestion: '',
+      correctAnswer: 0,
+      timerSec: 6.0,
+      timerMax: 6.0,
+      timerInterval: null
+    };
+
+    const blitzQuestionEl = document.getElementById('blitzQuestion');
+    const blitzAnswerInput = document.getElementById('blitzAnswerInput');
+    const blitzSubmitBtn = document.getElementById('blitzSubmitBtn');
+    const blitzResultSheet = document.getElementById('blitzResultSheet');
+    const blitzScoreEl = document.getElementById('blitzScore');
+    const blitzStreakEl = document.getElementById('blitzStreak');
+    const blitzBestEl = document.getElementById('blitzBest');
+    const blitzTimerBar = document.getElementById('blitzTimerBar');
+
+    blitzBestEl.textContent = blitzState.best;
+
+    blitzSubmitBtn.addEventListener('click', checkBlitzAnswer);
+    blitzAnswerInput.addEventListener('keydown', e => { if (e.key === 'Enter') checkBlitzAnswer(); });
+
+    function generateBlitzQuestion() {
+      clearInterval(blitzState.timerInterval);
+      const ops = ['+', '-', '×'];
+      const op = ops[Math.floor(Math.random() * ops.length)];
+      let a = Math.floor(Math.random() * 15) + 2;
+      let b = Math.floor(Math.random() * 12) + 2;
+
+      if (op === '-' && a < b) [a, b] = [b, a];
+
+      blitzState.activeQuestion = `${a} ${op} ${b}`;
+      blitzQuestionEl.textContent = `${blitzState.activeQuestion} = ?`;
+
+      switch (op) {
+        case '+': blitzState.correctAnswer = a + b; break;
+        case '-': blitzState.correctAnswer = a - b; break;
+        case '×': blitzState.correctAnswer = a * b; break;
+      }
+
+      blitzState.timerSec = Math.max(3.0, 6.0 - blitzState.streak * 0.25);
+      blitzState.timerMax = blitzState.timerSec;
+      startBlitzTimer();
+    }
+
+    function startBlitzTimer() {
+      blitzState.timerInterval = setInterval(() => {
+        blitzState.timerSec -= 0.1;
+        const pct = Math.max(0, (blitzState.timerSec / blitzState.timerMax) * 100);
+        blitzTimerBar.style.width = pct + '%';
+
+        if (blitzState.timerSec <= 0) {
+          clearInterval(blitzState.timerInterval);
+          onBlitzTimeout();
+        }
+      }, 100);
+    }
+
+    function onBlitzTimeout() {
+      sound.playError();
+      blitzState.streak = 0;
+      blitzStreakEl.textContent = 'x1';
+      showResultSheet(blitzResultSheet, `⏳ <strong>Time Out!</strong> Answer was ${blitzState.correctAnswer}.`, 'negative');
+      setTimeout(() => {
+        blitzResultSheet.style.display = 'none';
+        generateBlitzQuestion();
+      }, 1500);
+    }
+
+    function checkBlitzAnswer() {
+      sound.playTap();
+      const val = parseFloat(blitzAnswerInput.value.trim());
+      if (isNaN(val)) return;
+
+      clearInterval(blitzState.timerInterval);
+
+      if (Math.abs(val - blitzState.correctAnswer) < 0.001) {
+        sound.playSuccess();
+        blitzState.streak++;
+        const multiplier = Math.min(10, Math.floor(blitzState.streak / 2) + 1);
+        blitzState.score += 10 * multiplier;
+
+        blitzScoreEl.textContent = blitzState.score;
+        blitzStreakEl.textContent = `x${multiplier} 🔥`;
+
+        if (blitzState.score > blitzState.best) {
+          blitzState.best = blitzState.score;
+          localStorage.setItem('neon_blitz_best', blitzState.best);
+          blitzBestEl.textContent = blitzState.best;
+        }
+
+        if (blitzState.streak % 5 === 0) {
+          sound.playStreakFanfare();
+          triggerConfetti();
+        }
+
+        showResultSheet(blitzResultSheet, `✅ <strong>Correct!</strong> +${10 * multiplier} points`, 'positive');
+        YouTubePlayables.sendScore(blitzState.score);
+      } else {
+        sound.playError();
+        blitzState.streak = 0;
+        blitzStreakEl.textContent = 'x1';
+        showResultSheet(blitzResultSheet, `❌ <strong>Incorrect!</strong> Correct answer was ${blitzState.correctAnswer}.`, 'negative');
+      }
+
+      blitzAnswerInput.value = '';
+      setTimeout(() => {
+        blitzResultSheet.style.display = 'none';
+        generateBlitzQuestion();
+      }, 1200);
+    }
+
+    /**
+     * ============================================================================
+     * TAB 4: HIGH / LOW SURGE
+     * ============================================================================
+     */
+    const hlState = {
+      current: Math.floor(Math.random() * 100) + 1,
+      next: 0,
+      score: 0,
+      streak: 0,
+      best: parseInt(localStorage.getItem('neon_hl_best') || '0', 10)
+    };
+
+    const hlCurrentCard = document.getElementById('hlCurrentCard');
+    const hlNextCard = document.getElementById('hlNextCard');
+    const hlNextCardContainer = document.getElementById('hlNextCardContainer');
+    const hlHigherBtn = document.getElementById('hlHigherBtn');
+    const hlLowerBtn = document.getElementById('hlLowerBtn');
+    const hlResultSheet = document.getElementById('hlResultSheet');
+    const hlScoreEl = document.getElementById('hlScore');
+    const hlStreakEl = document.getElementById('hlStreak');
+    const hlBestEl = document.getElementById('hlBest');
+
+    hlCurrentCard.textContent = hlState.current;
+    hlBestEl.textContent = hlState.best;
+
+    hlHigherBtn.addEventListener('click', () => handleHighLow('higher'));
+    hlLowerBtn.addEventListener('click', () => handleHighLow('lower'));
+
+    function handleHighLow(choice) {
+      sound.playCardFlip();
+      do {
+        hlState.next = Math.floor(Math.random() * 100) + 1;
+      } while (hlState.next === hlState.current);
+
+      hlNextCard.textContent = hlState.next;
+      hlNextCardContainer.classList.add('reveal');
+
+      const isHigher = hlState.next > hlState.current;
+      const won = (choice === 'higher' && isHigher) || (choice === 'lower' && !isHigher);
+
+      if (won) {
+        sound.playSuccess();
+        hlState.score += 15;
+        hlState.streak++;
+        hlScoreEl.textContent = hlState.score;
+        hlStreakEl.textContent = hlState.streak;
+
+        if (hlState.score > hlState.best) {
+          hlState.best = hlState.score;
+          localStorage.setItem('neon_hl_best', hlState.best);
+          hlBestEl.textContent = hlState.best;
+        }
+
+        if (hlState.streak % 4 === 0) triggerConfetti();
+        showResultSheet(hlResultSheet, `🎯 <strong>Correct!</strong> ${hlState.next} was ${isHigher ? 'higher' : 'lower'}.`, 'positive');
+        YouTubePlayables.sendScore(hlState.score);
+      } else {
+        sound.playError();
+        hlState.streak = 0;
+        hlStreakEl.textContent = '0';
+        showResultSheet(hlResultSheet, `💔 <strong>Missed!</strong> ${hlState.next} was ${isHigher ? 'higher' : 'lower'}.`, 'negative');
+      }
+
+      setTimeout(() => {
+        hlState.current = hlState.next;
+        hlCurrentCard.textContent = hlState.current;
+        hlNextCard.textContent = '?';
+        hlNextCardContainer.classList.remove('reveal');
+        hlResultSheet.style.display = 'none';
+      }, 1600);
+    }
+
+    /**
+     * ============================================================================
+     * TAB 5: PRIME HUNTER ARCADE
+     * ============================================================================
+     */
+    const primeState = {
+      score: 0,
+      cleared: 0,
+      primesLeft: 0,
+      timer: 10.0,
+      timerInterval: null,
+      bubbles: []
+    };
+
+    const primeGrid = document.getElementById('primeGrid');
+    const primesClearedEl = document.getElementById('primesCleared');
+    const primesRemainingEl = document.getElementById('primesRemaining');
+    const primeScoreEl = document.getElementById('primeScore');
+    const primeTimerBar = document.getElementById('primeTimerBar');
+
+    function initPrimeRush() {
+      clearInterval(primeState.timerInterval);
+      primeGrid.innerHTML = '';
+      primeState.bubbles = [];
+
+      // Generate 6 random numbers ensuring at least 2 are primes
+      const pool = [];
+      const primePool = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47];
+      const compositePool = [4, 6, 8, 9, 10, 12, 14, 15, 16, 18, 20, 21, 22, 24, 25, 26, 27, 28];
+
+      // Add 2-3 primes
+      const primeCount = Math.floor(Math.random() * 2) + 2;
+      for (let i = 0; i < primeCount; i++) {
+        pool.push(primePool[Math.floor(Math.random() * primePool.length)]);
+      }
+      while (pool.length < 6) {
+        pool.push(compositePool[Math.floor(Math.random() * compositePool.length)]);
+      }
+
+      // Shuffle pool
+      pool.sort(() => Math.random() - 0.5);
+
+      primeState.primesLeft = pool.filter(n => isPrime(n)).length;
+      primesRemainingEl.textContent = primeState.primesLeft;
+
+      pool.forEach(num => {
+        const bubble = document.createElement('div');
+        bubble.className = 'prime-bubble';
+        bubble.textContent = num;
+        bubble.dataset.val = num;
+        bubble.addEventListener('click', () => onPrimeBubbleClick(bubble, num));
+        primeGrid.appendChild(bubble);
+        primeState.bubbles.push(bubble);
+      });
+
+      primeState.timer = 8.0;
+      primeTimerBar.style.width = '100%';
+      primeState.timerInterval = setInterval(() => {
+        primeState.timer -= 0.1;
+        const pct = Math.max(0, (primeState.timer / 8.0) * 100);
+        primeTimerBar.style.width = pct + '%';
+        if (primeState.timer <= 0) {
+          clearInterval(primeState.timerInterval);
+          sound.playError();
+          setTimeout(initPrimeRush, 1200);
+        }
+      }, 100);
+    }
+
+    function onPrimeBubbleClick(bubble, num) {
+      if (isPrime(num)) {
+        sound.playSuccess();
+        bubble.classList.add('correct');
+        primeState.score += 20;
+        primeScoreEl.textContent = primeState.score;
+        primeState.primesLeft--;
+        primesRemainingEl.textContent = primeState.primesLeft;
+
+        if (primeState.primesLeft === 0) {
+          clearInterval(primeState.timerInterval);
+          sound.playStreakFanfare();
+          triggerConfetti();
+          primeState.cleared++;
+          primesClearedEl.textContent = primeState.cleared;
+          YouTubePlayables.sendScore(primeState.score);
+          setTimeout(initPrimeRush, 1000);
+        }
+      } else {
+        sound.playError();
+        bubble.classList.add('wrong');
+        primeState.score = Math.max(0, primeState.score - 10);
+        primeScoreEl.textContent = primeState.score;
+        setTimeout(() => bubble.classList.remove('wrong'), 400);
+      }
+    }
+
+    /**
+     * ============================================================================
+     * TAB 6: PATTERN MASTER (Sequence Memory)
+     * ============================================================================
+     */
+    const sequenceState = {
+      score: 0,
+      streak: 0,
+      level: 1,
+      options: [],
+      correct: 0
+    };
+
+    const sequenceFormulaEl = document.getElementById('sequenceFormula');
+    const sequenceHintEl = document.getElementById('sequenceHint');
+    const sequenceOptionsEl = document.getElementById('sequenceOptions');
+    const sequenceResultSheet = document.getElementById('sequenceResultSheet');
+    const sequenceScoreEl = document.getElementById('sequenceScore');
+    const sequenceLevelEl = document.getElementById('sequenceLevel');
+    const sequenceStreakEl = document.getElementById('sequenceStreak');
+
+    function generateSequence() {
+      sequenceOptionsEl.innerHTML = '';
+      const types = ['arithmetic', 'geometric', 'squares', 'fibonacci'];
+      const type = types[Math.floor(Math.random() * types.length)];
+
+      let seq = [];
+      let nextVal = 0;
+      let hint = '';
+
+      if (type === 'arithmetic') {
+        const start = Math.floor(Math.random() * 10) + 1;
+        const diff = Math.floor(Math.random() * 5) + 2;
+        seq = [start, start + diff, start + 2 * diff, start + 3 * diff];
+        nextVal = start + 4 * diff;
+        hint = `Arithmetic Progression (+${diff})`;
+      } else if (type === 'geometric') {
+        const start = Math.floor(Math.random() * 3) + 2;
+        const ratio = 2;
+        seq = [start, start * ratio, start * 4, start * 8];
+        nextVal = start * 16;
+        hint = `Geometric Progression (×${ratio})`;
+      } else if (type === 'squares') {
+        const offset = Math.floor(Math.random() * 3) + 1;
+        seq = [offset*offset, (offset+1)*(offset+1), (offset+2)*(offset+2), (offset+3)*(offset+3)];
+        nextVal = (offset+4)*(offset+4);
+        hint = `Perfect Squares (n²)`;
+      } else {
+        seq = [1, 1, 2, 3, 5];
+        nextVal = 8;
+        hint = `Fibonacci Sequence (sum of prior two)`;
+      }
+
+      sequenceState.correct = nextVal;
+      sequenceFormulaEl.textContent = `${seq.join(', ')}, [ ? ]`;
+      sequenceHintEl.textContent = hint;
+
+      // Generate 4 options
+      const optSet = new Set([nextVal]);
+      while (optSet.size < 4) {
+        const fake = nextVal + (Math.floor(Math.random() * 7) - 3) * (Math.random() > 0.5 ? 1 : 2);
+        if (fake !== nextVal && fake > 0) optSet.add(fake);
+      }
+
+      const shuffled = Array.from(optSet).sort(() => Math.random() - 0.5);
+      sequenceState.options = shuffled;
+
+      shuffled.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'sequence-btn';
+        btn.textContent = opt;
+        btn.addEventListener('click', () => onSequenceOptionChosen(opt));
+        sequenceOptionsEl.appendChild(btn);
+      });
+    }
+
+    function onSequenceOptionChosen(chosen) {
+      sound.playTap();
+      if (chosen === sequenceState.correct) {
+        sound.playSuccess();
+        sequenceState.score += 25;
+        sequenceState.streak++;
+        sequenceState.level = Math.floor(sequenceState.streak / 3) + 1;
+
+        sequenceScoreEl.textContent = sequenceState.score;
+        sequenceStreakEl.textContent = sequenceState.streak;
+        sequenceLevelEl.textContent = sequenceState.level;
+
+        triggerConfetti();
+        showResultSheet(sequenceResultSheet, `🌟 <strong>Genius!</strong> ${chosen} completes the pattern.`, 'positive');
+        YouTubePlayables.sendScore(sequenceState.score);
+      } else {
+        sound.playError();
+        sequenceState.streak = 0;
+        sequenceStreakEl.textContent = '0';
+        showResultSheet(sequenceResultSheet, `❌ <strong>Incorrect.</strong> The correct next term was ${sequenceState.correct}.`, 'negative');
+      }
+
+      setTimeout(() => {
+        sequenceResultSheet.style.display = 'none';
+        generateSequence();
+      }, 1400);
+    }
+
+    /**
+     * ============================================================================
+     * TYPESAFE SYSTEM ONE INTENT ROUTER SIMULATION
+     * ============================================================================
+     */
+    const nlpInput = document.getElementById('nlpInput');
+    const nlpBtn = document.getElementById('nlpBtn');
+
+    nlpBtn.addEventListener('click', evaluateIntent);
+    nlpInput.addEventListener('keydown', e => { if (e.key === 'Enter') evaluateIntent(); });
+
+    function evaluateIntent() {
+      sound.playTap();
+      const text = nlpInput.value.toLowerCase().trim();
+      if (!text) return;
+
+      // Extract single number if user asks "is 42 prime?" or "inspect 97"
+      const numberMatch = text.match(/-?\d+(\.\d+)?/);
+
+      if (text.includes('inspect') || text.includes('check') || (numberMatch && (text.includes('is') || text.includes('what is')))) {
+        switchTab('tabInspector');
+        if (numberMatch) {
+          inspectorInput.value = numberMatch[0];
+          runInspector();
+        }
+      } else if (text.includes('guess') || text.includes('between') || text.includes('1-100') || text.includes('hot')) {
+        switchTab('tabGuessing');
+      } else if (text.includes('blitz') || text.includes('arithmetic') || text.includes('quiz') || text.includes('math') || text.includes('timed')) {
+        switchTab('tabBlitz');
+      } else if (text.includes('high') || text.includes('low') || text.includes('higher') || text.includes('card')) {
+        switchTab('tabHighLow');
+      } else if (text.includes('prime') || text.includes('primes') || text.includes('hunt')) {
+        switchTab('tabPrimes');
+      } else if (text.includes('sequence') || text.includes('pattern') || text.includes('memory') || text.includes('series')) {
+        switchTab('tabSequence');
+      } else {
+        switchTab('tabInspector');
+      }
+
+      nlpInput.value = '';
+    }
+
+    /**
+     * ============================================================================
+     * EVENT LISTENERS & LIFECYCLE
+     * ============================================================================
+     */
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1. Tab Navigation Click Events
+      document.querySelectorAll('.segment-btn').forEach(btn => {
+        btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+      });
+
+      // 2. Sound Toggle
+      const soundBtn = document.getElementById('soundToggleBtn');
+      soundBtn.classList.toggle('active', !sound.muted);
+      soundBtn.addEventListener('click', () => {
+        const isMuted = sound.toggleMute();
+        soundBtn.classList.toggle('active', !isMuted);
+      });
+
+      // 3. Fullscreen Toggle
+      const fsBtn = document.getElementById('fullscreenToggleBtn');
+      fsBtn.addEventListener('click', () => {
+        sound.playTap();
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {});
+          fsBtn.classList.add('active');
+        } else {
+          document.exitFullscreen().catch(() => {});
+          fsBtn.classList.remove('active');
+        }
+      });
+
+      // 4. Keyboard Shortcuts: 1-6 for tabs
+      window.addEventListener('keydown', (e) => {
+        if (document.activeElement.tagName === 'INPUT') return;
+        const tabs = ['tabInspector', 'tabGuessing', 'tabBlitz', 'tabHighLow', 'tabPrimes', 'tabSequence'];
+        const num = parseInt(e.key, 10);
+        if (num >= 1 && num <= 6) {
+          switchTab(tabs[num - 1]);
+        }
+      });
+
+      // 5. Initialize Ambient 8K Particles & YouTube Playables
+      initAmbientParticles();
+      YouTubePlayables.init();
+    });
+  </script>
+</body>
+</html>
