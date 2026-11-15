@@ -19,11 +19,20 @@
 
   <p align="center">
     <a href="https://rrkpublisher56955.github.io/Neon-Number-Games/"><strong>▶ Play Live Demo</strong></a> •
+    <a href="https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Frrkpublisher56955%2FNeon-Number-Games&amp;project-name=neon-number-games"><strong>▲ Deploy to Vercel</strong></a> •
     <a href="#-six-quantum-game-modes">Game Modes</a> •
     <a href="#-apple-design-foundations">Apple Design</a> •
     <a href="#-youtube-playables-certification">YouTube Playables</a> •
     <a href="#-typesafe-system-one-ai-routing">TypeSafe AI</a> •
     <a href="#-suggested-future-features">Feature Roadmap</a>
+  </p>
+
+  <br/>
+
+  <p align="center">
+    <a href="https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Frrkpublisher56955%2FNeon-Number-Games&amp;project-name=neon-number-games">
+      <img src="https://vercel.com/button" alt="Deploy with Vercel" />
+    </a>
   </p>
 
 </div>
